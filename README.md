@@ -2,7 +2,7 @@
 
 An end-to-end Machine Learning web application designed to detect fraudulent, deceptive, and phishing emails in real time using Natural Language Processing (NLP) and Scikit-Learn.
 
-🔗 **Live Demo:** [Check out MailGuardX Live](https://share.streamlit.io)
+🔗 **Live Demo:** [Check out MailGuardX Live](https://emaildetection-grxkqhea5isz8e2ykvwbkr.streamlit.app/)
 
 ---
 
