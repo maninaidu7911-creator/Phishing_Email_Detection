@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- Dynamic Backgrounds & Custom Styling ---
+# --- Dynamic Styling ---
 def inject_custom_styling(status=None):
     if status == "safe":
         bg_style = "background: radial-gradient(circle at 50% 20%, #064e3b 0%, #022c22 45%, #0a0f1d 100%) !important;"
@@ -46,33 +46,34 @@ def inject_custom_styling(status=None):
             100% {{ opacity: 1; transform: translateY(0); }}
         }}
 
-        /* Continuous Sliding Ticker Animation */
+        /* Seamless Continuous Alert Ticker */
         @keyframes tickerSlide {{
-            0% {{ transform: translateX(100%); }}
-            100% {{ transform: translateX(-100%); }}
+            0% {{ transform: translateX(0); }}
+            100% {{ transform: translateX(-50%); }}
         }}
 
         .ticker-wrap {{
             width: 100%;
             overflow: hidden;
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(15, 23, 42, 0.75);
             border: 1px solid rgba(56, 189, 248, 0.25);
             border-radius: 30px;
             padding: 10px 0;
             margin: 18px 0 24px 0;
             backdrop-filter: blur(10px);
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+            display: flex;
             white-space: nowrap;
         }}
 
         .ticker-content {{
-            display: inline-block;
+            display: inline-flex;
             white-space: nowrap;
-            animation: tickerSlide 22s linear infinite;
-            font-size: 13.5px;
+            animation: tickerSlide 20s linear infinite;
+            font-size: 14px;
             font-weight: 600;
             color: #e0f2fe;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.3px;
         }}
 
         .ticker-wrap:hover .ticker-content {{
@@ -81,16 +82,21 @@ def inject_custom_styling(status=None):
 
         .ticker-badge {{
             background: #ef4444;
-            color: white;
+            color: #ffffff;
             padding: 3px 10px;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 800;
             text-transform: uppercase;
             margin-right: 8px;
+            display: inline-block;
         }}
 
-        /* Text Area Styling */
+        .ticker-item {{
+            margin-right: 32px;
+        }}
+
+        /* Text Area */
         .stTextArea textarea {{
             background: rgba(15, 23, 42, 0.85) !important;
             border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -125,7 +131,7 @@ def inject_custom_styling(status=None):
             box-shadow: 0 8px 30px {accent_color}88;
         }}
 
-        /* Results Display Cards */
+        /* Output Cards */
         .result-safe {{
             background: linear-gradient(135deg, rgba(6, 78, 59, 0.9), rgba(16, 185, 129, 0.7));
             border: 1px solid #34d399;
@@ -158,7 +164,6 @@ def inject_custom_styling(status=None):
             opacity: 0.95;
         }}
 
-        /* Indicator detail boxes */
         .indicator-box {{
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -169,7 +174,7 @@ def inject_custom_styling(status=None):
             font-size: 14px;
         }}
 
-        /* Footer */
+        /* Custom Footer */
         .custom-footer {{
             text-align: center;
             margin-top: 50px;
@@ -196,12 +201,16 @@ def inject_custom_styling(status=None):
 # --- Heuristic Rule Scanner ---
 def analyze_heuristics(text):
     flags = []
+    
+    # 1. IP address in link
     if re.search(r'https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', text):
-        flags.append("Direct IP address used instead of domain name.")
+        flags.append("Suspicious numeric IP address link detected.")
         
+    # 2. URL shorteners
     if re.search(r'bit\.ly|tinyurl\.com|t\.co|is\.gd|cutt\.ly|ow\.ly', text, re.IGNORECASE):
-        flags.append("Obfuscated or shortened link detected.")
+        flags.append("Shortened link detected (used to hide real destinations).")
         
+    # 3. Urgency pressure triggers
     urgency_patterns = [
         r'\bverify your account\b', r'\baccount (has been )?suspended\b',
         r'\bimmediate action required\b', r'\bwithin 24 hours\b',
@@ -209,13 +218,14 @@ def analyze_heuristics(text):
     ]
     for pattern in urgency_patterns:
         if re.search(pattern, text, re.IGNORECASE):
-            flags.append("High-pressure psychological urgency cue detected.")
+            flags.append("Urgent warning or threat of account blockage detected.")
             break
 
+    # 4. Credential solicitation
     credential_patterns = [r'\benter your password\b', r'\bprovide your (ssn|otp|pin|cvv)\b', r'\bconfirm bank details\b']
     for pattern in credential_patterns:
         if re.search(pattern, text, re.IGNORECASE):
-            flags.append("Direct request for sensitive credentials or security numbers.")
+            flags.append("Direct request for confidential passwords or bank details.")
             break
 
     return flags
@@ -250,18 +260,21 @@ with col_center:
                 MailGuardX
             </h1>
             <p style='color: #94a3b8; font-size: 16px; max-width: 580px; margin: 0 auto;'>
-                An intelligent security scanner that analyses linguistic patterns and suspicious indicators to verify email integrity.
+                Dual-layer AI security engine: Machine Learning classification + forensic security checks.
             </p>
         </div>
 
-        <!-- Floating Alert / Beware of Frauds Sliding Ticker -->
+        <!-- Seamless Alert Ticker with Simple Hints -->
         <div class='ticker-wrap'>
             <div class='ticker-content'>
-                <span class='ticker-badge'>LIVE ALERT</span>
-                ⚠️ Beware of Frauds: Banks never ask for OTP or CVV over email! &nbsp;&bull;&nbsp;
-                🚨 Double check sender addresses before clicking links &nbsp;&bull;&nbsp;
-                🛑 Urgent threats of account deactivation are common phishing indicators &nbsp;&bull;&nbsp;
-                🔒 Verify before you trust with MailGuardX!
+                <span class='ticker-item'><span class='ticker-badge'>ALERT</span> Never share OTP, CVV, or passwords with anyone!</span>
+                <span class='ticker-item'>🔍 Real banks never ask for your password via email.</span>
+                <span class='ticker-item'>⚠️ Be cautious of emails threatening to block your account.</span>
+                <span class='ticker-item'>🔗 Always verify link addresses before clicking.</span>
+                <span class='ticker-item'><span class='ticker-badge'>ALERT</span> Never share OTP, CVV, or passwords with anyone!</span>
+                <span class='ticker-item'>🔍 Real banks never ask for your password via email.</span>
+                <span class='ticker-item'>⚠️ Be cautious of emails threatening to block your account.</span>
+                <span class='ticker-item'>🔗 Always verify link addresses before clicking.</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
