@@ -46,12 +46,12 @@ def inject_custom_styling(status=None):
             100% {{ opacity: 1; transform: translateY(0); }}
         }}
 
-        /* Slides from right to left, clears completely, holds for 2 seconds, and repeats */
+        /* Smooth calm speed: moves across, completely exits left, pauses ~2s, repeats */
         @keyframes tickerSlideWithPause {{
             0% {{
                 transform: translateX(100%);
             }}
-            88% {{
+            92% {{
                 transform: translateX(-100%);
             }}
             100% {{
@@ -75,7 +75,7 @@ def inject_custom_styling(status=None):
         .ticker-content {{
             display: inline-block;
             white-space: nowrap;
-            animation: tickerSlideWithPause 17s linear infinite;
+            animation: tickerSlideWithPause 28s linear infinite;
             font-size: 14px;
             font-weight: 600;
             color: #e0f2fe;
@@ -257,7 +257,7 @@ col_left, col_center, col_right = st.columns([1, 6, 1])
 
 with col_center:
     st.markdown("""
-       <div style='text-align: center; padding: 15px 0 5px 0;'>
+        <div style='text-align: center; padding: 15px 0 5px 0;'>
             <h1 style='font-size: 46px; font-weight: 800; background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
                 MailGuardX
             </h1>
