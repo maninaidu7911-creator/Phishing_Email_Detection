@@ -46,22 +46,16 @@ def inject_custom_styling(status=None):
             100% {{ opacity: 1; transform: translateY(0); }}
         }}
 
-        /* Starts immediately on load at 0%, scrolls out left, rests ~2s, then loops from right */
+        /* Starts from the right side, slides across smoothly to the left, holds 2s off-screen, and repeats */
         @keyframes tickerSlideWithPause {{
             0% {{
-                transform: translateX(0%);
-            }}
-            88% {{
-                transform: translateX(-100%);
-            }}
-            95% {{
-                transform: translateX(-100%);
-            }}
-            95.01% {{
                 transform: translateX(100%);
+            }}
+            93% {{
+                transform: translateX(-100%);
             }}
             100% {{
-                transform: translateX(100%);
+                transform: translateX(-100%);
             }}
         }}
 
@@ -81,7 +75,8 @@ def inject_custom_styling(status=None):
         .ticker-content {{
             display: inline-block;
             white-space: nowrap;
-            animation: tickerSlideWithPause 22s linear infinite;
+            /* 26 seconds total: leisurely scrolling across + 2-second off-screen pause */
+            animation: tickerSlideWithPause 26s linear infinite;
             font-size: 14px;
             font-weight: 600;
             color: #e0f2fe;
@@ -272,7 +267,7 @@ with col_center:
             </p>
         </div>
 
-        <!-- Floating Alert Ticker with Immediate Start & 2-Second Pause Interval -->
+        <!-- Floating Alert Ticker Starting Smoothly from Right to Left -->
         <div class='ticker-wrap'>
             <div class='ticker-content'>
                 <span class='ticker-badge'>ALERT</span>
