@@ -10,26 +10,18 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- Dynamic Aesthetic Backgrounds & Custom Keyframe Animations ---
+# --- Dynamic Backgrounds & Custom Styling ---
 def inject_custom_styling(status=None):
     if status == "safe":
-        bg_style = """
-            background: radial-gradient(circle at 50% 20%, #064e3b 0%, #022c22 45%, #0a0f1d 100%) !important;
-            transition: all 0.8s ease-in-out;
-        """
+        bg_style = "background: radial-gradient(circle at 50% 20%, #064e3b 0%, #022c22 45%, #0a0f1d 100%) !important;"
         accent_color = "#34d399"
         glow_effect = "0 0 35px rgba(52, 211, 153, 0.35)"
     elif status == "unsafe":
-        bg_style = """
-            background: radial-gradient(circle at 50% 20%, #7f1d1d 0%, #450a0a 45%, #0a0f1d 100%) !important;
-            transition: all 0.8s ease-in-out;
-        """
+        bg_style = "background: radial-gradient(circle at 50% 20%, #7f1d1d 0%, #450a0a 45%, #0a0f1d 100%) !important;"
         accent_color = "#f87171"
         glow_effect = "0 0 35px rgba(248, 113, 113, 0.4)"
     else:
-        bg_style = """
-            background: radial-gradient(circle at 50% 10%, #172554 0%, #0b1120 50%, #030712 100%) !important;
-        """
+        bg_style = "background: radial-gradient(circle at 50% 10%, #172554 0%, #0b1120 50%, #030712 100%) !important;"
         accent_color = "#38bdf8"
         glow_effect = "0 0 25px rgba(56, 189, 248, 0.25)"
 
@@ -41,6 +33,7 @@ def inject_custom_styling(status=None):
             {bg_style}
             font-family: 'Plus Jakarta Sans', sans-serif;
             color: #f3f4f6;
+            transition: background 0.8s ease-in-out;
         }}
 
         [data-testid="stHeader"] {{
@@ -48,38 +41,27 @@ def inject_custom_styling(status=None):
         }}
 
         @keyframes cardSlideUp {{
-            0% {{ opacity: 0; transform: translateY(24px) scale(0.98); }}
-            100% {{ opacity: 1; transform: translateY(0) scale(1); }}
+            0% {{ opacity: 0; transform: translateY(20px); }}
+            100% {{ opacity: 1; transform: translateY(0); }}
         }}
 
-        /* Glassmorphism Container */
-        .glass-panel {{
-            background: rgba(17, 24, 39, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 32px;
-            animation: cardSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            box-shadow: {glow_effect};
-        }}
-
-        /* Text area modern sleek style */
+        /* Text Area Styling */
         .stTextArea textarea {{
-            background: rgba(15, 23, 42, 0.8) !important;
+            background: rgba(15, 23, 42, 0.85) !important;
             border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-radius: 14px !important;
+            border-radius: 16px !important;
             color: #f8fafc !important;
             font-size: 15px !important;
-            padding: 16px !important;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            padding: 18px !important;
+            box-shadow: {glow_effect} !important;
+            transition: all 0.3s ease;
         }}
         .stTextArea textarea:focus {{
             border-color: {accent_color} !important;
-            box-shadow: 0 0 16px {accent_color}44 !important;
+            box-shadow: 0 0 20px {accent_color}55 !important;
         }}
 
-        /* Primary Action Button */
+        /* Action Buttons */
         .stButton button {{
             background: linear-gradient(135deg, {accent_color}, #2563eb) !important;
             color: #ffffff !important;
@@ -94,11 +76,11 @@ def inject_custom_styling(status=None):
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }}
         .stButton button:hover {{
-            transform: translateY(-2px) scale(1.01);
+            transform: translateY(-2px);
             box-shadow: 0 8px 30px {accent_color}88;
         }}
 
-        /* Results Aesthetic Displays */
+        /* Results Display Cards */
         .result-safe {{
             background: linear-gradient(135deg, rgba(6, 78, 59, 0.9), rgba(16, 185, 129, 0.7));
             border: 1px solid #34d399;
@@ -123,7 +105,6 @@ def inject_custom_styling(status=None):
             font-size: 26px;
             font-weight: 800;
             margin-bottom: 6px;
-            letter-spacing: -0.5px;
         }}
 
         .status-subtitle {{
@@ -132,22 +113,21 @@ def inject_custom_styling(status=None):
             opacity: 0.95;
         }}
 
-        /* Footer aesthetic style */
+        /* Footer */
         .custom-footer {{
             text-align: center;
-            margin-top: 45px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            letter-spacing: 0.6px;
+            margin-top: 50px;
+            margin-bottom: 25px;
         }}
         .designer-tag {{
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.12);
-            padding: 8px 18px;
+            padding: 8px 20px;
             border-radius: 20px;
             color: #cbd5e1;
             display: inline-block;
             backdrop-filter: blur(8px);
+            font-size: 14px;
         }}
         .designer-name {{
             color: #60a5fa;
@@ -157,7 +137,7 @@ def inject_custom_styling(status=None):
     </style>
     """, unsafe_allow_html=True)
 
-# --- Model Artifact Loader ---
+# --- Load Models ---
 @st.cache_resource
 def load_models():
     model = joblib.load(os.path.join("models", "phishing_model.pkl"))
@@ -170,16 +150,14 @@ except Exception as e:
     st.error(f"Error loading models: {e}")
     st.stop()
 
-# Initialize session state for analysis status
 if "analysis_status" not in st.session_state:
     st.session_state["analysis_status"] = None
 if "result_data" not in st.session_state:
     st.session_state["result_data"] = {}
 
-# Apply dynamic styling
 inject_custom_styling(st.session_state["analysis_status"])
 
-# --- Main Layout ---
+# --- Layout ---
 col_left, col_center, col_right = st.columns([1, 6, 1])
 
 with col_center:
@@ -195,8 +173,6 @@ with col_center:
     """, unsafe_allow_html=True)
 
     with st.container():
-        st.markdown("<div class='glass-panel'>", unsafe_allow_html=True)
-
         user_input = st.text_area(
             "Incoming Email Text",
             placeholder="Paste raw email header, subject, or email body text here...",
@@ -238,9 +214,7 @@ with col_center:
                     }
                     st.rerun()
 
-        # Display results based on state
         if st.session_state["analysis_status"] == "safe":
-            st.balloons()
             conf = st.session_state["result_data"].get("confidence", 95.0)
             st.markdown(f"""
                 <div style='height: 20px;'></div>
@@ -256,7 +230,6 @@ with col_center:
             """, unsafe_allow_html=True)
 
         elif st.session_state["analysis_status"] == "unsafe":
-            st.snow()
             conf = st.session_state["result_data"].get("confidence", 95.0)
             st.markdown(f"""
                 <div style='height: 20px;'></div>
@@ -271,9 +244,7 @@ with col_center:
                 </div>
             """, unsafe_allow_html=True)
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
-# Footer with your name
+# Footer
 st.markdown("""
     <div class='custom-footer'>
         <div class='designer-tag'>
