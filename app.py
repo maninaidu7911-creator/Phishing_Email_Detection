@@ -4,7 +4,7 @@ import os
 import time
 
 st.set_page_config(
-    page_title="CheckMyMail | AI Security Guardian",
+    page_title="MailGuardX | Phishing AI Detector",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -45,19 +45,6 @@ def inject_custom_styling(status=None):
 
         [data-testid="stHeader"] {{
             background: transparent;
-        }}
-
-        /* Subtle floating animations */
-        @keyframes floatSlow {{
-            0% {{ transform: translateY(0px) rotate(0deg); }}
-            50% {{ transform: translateY(-8px) rotate(1deg); }}
-            100% {{ transform: translateY(0px) rotate(0deg); }}
-        }}
-
-        @keyframes pulseGlow {{
-            0% {{ box-shadow: 0 0 15px rgba(255,255,255,0.05); }}
-            50% {{ box-shadow: {glow_effect}; }}
-            100% {{ box-shadow: 0 0 15px rgba(255,255,255,0.05); }}
         }}
 
         @keyframes cardSlideUp {{
@@ -144,6 +131,29 @@ def inject_custom_styling(status=None):
             color: #e5e7eb;
             opacity: 0.95;
         }}
+
+        /* Footer aesthetic style */
+        .custom-footer {{
+            text-align: center;
+            margin-top: 45px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            letter-spacing: 0.6px;
+        }}
+        .designer-tag {{
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 8px 18px;
+            border-radius: 20px;
+            color: #cbd5e1;
+            display: inline-block;
+            backdrop-filter: blur(8px);
+        }}
+        .designer-name {{
+            color: #60a5fa;
+            font-weight: 700;
+            text-decoration: none;
+        }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -166,7 +176,7 @@ if "analysis_status" not in st.session_state:
 if "result_data" not in st.session_state:
     st.session_state["result_data"] = {}
 
-# Apply initial background styling
+# Apply dynamic styling
 inject_custom_styling(st.session_state["analysis_status"])
 
 # --- Main Layout ---
@@ -175,8 +185,8 @@ col_left, col_center, col_right = st.columns([1, 6, 1])
 with col_center:
     st.markdown("""
         <div style='text-align: center; padding: 20px 0;'>
-            <h1 style='font-size: 44px; font-weight: 800; background: linear-gradient(90deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
-                CheckMyMail AI
+            <h1 style='font-size: 46px; font-weight: 800; background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
+                MailGuardX
             </h1>
             <p style='color: #94a3b8; font-size: 16px; max-width: 580px; margin: 0 auto;'>
                 An intelligent security scanner that analyses linguistic patterns and suspicious indicators to verify email integrity.
@@ -263,9 +273,11 @@ with col_center:
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-# Footer
+# Footer with your name
 st.markdown("""
-    <div style='text-align: center; color: #64748b; font-size: 13px; margin-top: 40px;'>
-        CheckMyMail Engine • Real-time Scikit-Learn Vector Architecture
+    <div class='custom-footer'>
+        <div class='designer-tag'>
+            Designed by | <a href='https://www.linkedin.com/in/dandabattula-manikanta' target='_blank' class='designer-name'>Manikanta</a>
+        </div>
     </div>
 """, unsafe_allow_html=True)
