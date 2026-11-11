@@ -1,6 +1,7 @@
 import streamlit as st
 import joblib
 import os
+import re
 import time
 
 st.set_page_config(
@@ -43,6 +44,50 @@ def inject_custom_styling(status=None):
         @keyframes cardSlideUp {{
             0% {{ opacity: 0; transform: translateY(20px); }}
             100% {{ opacity: 1; transform: translateY(0); }}
+        }}
+
+        /* Continuous Sliding Ticker Animation */
+        @keyframes tickerSlide {{
+            0% {{ transform: translateX(100%); }}
+            100% {{ transform: translateX(-100%); }}
+        }}
+
+        .ticker-wrap {{
+            width: 100%;
+            overflow: hidden;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-radius: 30px;
+            padding: 10px 0;
+            margin: 18px 0 24px 0;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+            white-space: nowrap;
+        }}
+
+        .ticker-content {{
+            display: inline-block;
+            white-space: nowrap;
+            animation: tickerSlide 22s linear infinite;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #e0f2fe;
+            letter-spacing: 0.4px;
+        }}
+
+        .ticker-wrap:hover .ticker-content {{
+            animation-play-state: paused;
+        }}
+
+        .ticker-badge {{
+            background: #ef4444;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-right: 8px;
         }}
 
         /* Text Area Styling */
@@ -113,6 +158,17 @@ def inject_custom_styling(status=None):
             opacity: 0.95;
         }}
 
+        /* Indicator detail boxes */
+        .indicator-box {{
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 14px;
+            text-align: left;
+            font-size: 14px;
+        }}
+
         /* Footer */
         .custom-footer {{
             text-align: center;
@@ -136,6 +192,33 @@ def inject_custom_styling(status=None):
         }}
     </style>
     """, unsafe_allow_html=True)
+
+# --- Heuristic Rule Scanner ---
+def analyze_heuristics(text):
+    flags = []
+    if re.search(r'https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', text):
+        flags.append("Direct IP address used instead of domain name.")
+        
+    if re.search(r'bit\.ly|tinyurl\.com|t\.co|is\.gd|cutt\.ly|ow\.ly', text, re.IGNORECASE):
+        flags.append("Obfuscated or shortened link detected.")
+        
+    urgency_patterns = [
+        r'\bverify your account\b', r'\baccount (has been )?suspended\b',
+        r'\bimmediate action required\b', r'\bwithin 24 hours\b',
+        r'\bunauthorized access\b', r'\bsecurity alert\b', r'\bclick here immediately\b'
+    ]
+    for pattern in urgency_patterns:
+        if re.search(pattern, text, re.IGNORECASE):
+            flags.append("High-pressure psychological urgency cue detected.")
+            break
+
+    credential_patterns = [r'\benter your password\b', r'\bprovide your (ssn|otp|pin|cvv)\b', r'\bconfirm bank details\b']
+    for pattern in credential_patterns:
+        if re.search(pattern, text, re.IGNORECASE):
+            flags.append("Direct request for sensitive credentials or security numbers.")
+            break
+
+    return flags
 
 # --- Load Models ---
 @st.cache_resource
@@ -162,13 +245,24 @@ col_left, col_center, col_right = st.columns([1, 6, 1])
 
 with col_center:
     st.markdown("""
-        <div style='text-align: center; padding: 20px 0;'>
+        <div style='text-align: center; padding: 15px 0 5px 0;'>
             <h1 style='font-size: 46px; font-weight: 800; background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
                 MailGuardX
             </h1>
             <p style='color: #94a3b8; font-size: 16px; max-width: 580px; margin: 0 auto;'>
                 An intelligent security scanner that analyses linguistic patterns and suspicious indicators to verify email integrity.
             </p>
+        </div>
+
+        <!-- Floating Alert / Beware of Frauds Sliding Ticker -->
+        <div class='ticker-wrap'>
+            <div class='ticker-content'>
+                <span class='ticker-badge'>LIVE ALERT</span>
+                ⚠️ Beware of Frauds: Banks never ask for OTP or CVV over email! &nbsp;&bull;&nbsp;
+                🚨 Double check sender addresses before clicking links &nbsp;&bull;&nbsp;
+                🛑 Urgent threats of account deactivation are common phishing indicators &nbsp;&bull;&nbsp;
+                🔒 Verify before you trust with MailGuardX!
+            </div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -198,22 +292,38 @@ with col_center:
                 st.warning("Please paste email content first to begin inspection.")
             else:
                 with st.spinner("Decoding email signatures & evaluating security weights..."):
-                    time.sleep(0.4)
+                    time.sleep(0.3)
+                    
+                    heuristic_flags = analyze_heuristics(user_input)
                     transformed = vectorizer.transform([user_input])
                     prediction = model.predict(transformed)[0]
 
-                    prob_val = 95.0
                     if hasattr(model, "predict_proba"):
                         probs = model.predict_proba(transformed)[0]
-                        prob_val = probs[1] * 100 if prediction == 1 else probs[0] * 100
+                        phish_prob = probs[1] * 100
+                        safe_prob = probs[0] * 100
+                    else:
+                        phish_prob = 92.0 if prediction == 1 else 8.0
+                        safe_prob = 100 - phish_prob
 
-                    st.session_state["analysis_status"] = "unsafe" if prediction == 1 else "safe"
+                    is_phishing = (prediction == 1) or (len(heuristic_flags) >= 2)
+                    
+                    if is_phishing:
+                        final_confidence = max(phish_prob, 88.0 if heuristic_flags else 75.0)
+                        status = "unsafe"
+                    else:
+                        final_confidence = safe_prob
+                        status = "safe"
+
+                    st.session_state["analysis_status"] = status
                     st.session_state["result_data"] = {
-                        "prediction": prediction,
-                        "confidence": prob_val
+                        "prediction": 1 if is_phishing else 0,
+                        "confidence": final_confidence,
+                        "flags": heuristic_flags
                     }
                     st.rerun()
 
+        # Display Result Card
         if st.session_state["analysis_status"] == "safe":
             conf = st.session_state["result_data"].get("confidence", 95.0)
             st.markdown(f"""
@@ -221,7 +331,7 @@ with col_center:
                 <div class='result-safe'>
                     <div class='status-title'>🎉 ALL CLEAR — SAFE & AUTHENTIC</div>
                     <div class='status-subtitle'>
-                        No deceptive intent, spoofed patterns, or high-risk language discovered.
+                        No deceptive intent, malicious payload links, or high-risk language discovered.
                     </div>
                     <div style='margin-top: 15px; font-weight: 700; color: #ecfdf5;'>
                         Authenticity Confidence: {conf:.1f}%
@@ -231,6 +341,20 @@ with col_center:
 
         elif st.session_state["analysis_status"] == "unsafe":
             conf = st.session_state["result_data"].get("confidence", 95.0)
+            flags = st.session_state["result_data"].get("flags", [])
+            
+            flag_html = ""
+            if flags:
+                flag_items = "".join([f"<li>{f}</li>" for f in flags])
+                flag_html = f"""
+                    <div class='indicator-box'>
+                        <div style='font-weight: 700; color: #fca5a5; margin-bottom: 5px;'>Identified Risk Indicators:</div>
+                        <ul style='margin: 0; padding-left: 20px; color: #fecaca;'>
+                            {flag_items}
+                        </ul>
+                    </div>
+                """
+
             st.markdown(f"""
                 <div style='height: 20px;'></div>
                 <div class='result-unsafe'>
@@ -241,6 +365,7 @@ with col_center:
                     <div style='margin-top: 15px; font-weight: 700; color: #fee2e2;'>
                         Risk Probability: {conf:.1f}%
                     </div>
+                    {flag_html}
                 </div>
             """, unsafe_allow_html=True)
 
