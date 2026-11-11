@@ -46,10 +46,17 @@ def inject_custom_styling(status=None):
             100% {{ opacity: 1; transform: translateY(0); }}
         }}
 
-        /* Seamless Continuous Alert Ticker */
-        @keyframes tickerSlide {{
-            0% {{ transform: translateX(0); }}
-            100% {{ transform: translateX(-50%); }}
+        /* Slides from right to left, clears completely, holds for 2 seconds, and repeats */
+        @keyframes tickerSlideWithPause {{
+            0% {{
+                transform: translateX(100%);
+            }}
+            88% {{
+                transform: translateX(-100%);
+            }}
+            100% {{
+                transform: translateX(-100%);
+            }}
         }}
 
         .ticker-wrap {{
@@ -62,14 +69,13 @@ def inject_custom_styling(status=None):
             margin: 18px 0 24px 0;
             backdrop-filter: blur(10px);
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
-            display: flex;
             white-space: nowrap;
         }}
 
         .ticker-content {{
-            display: inline-flex;
+            display: inline-block;
             white-space: nowrap;
-            animation: tickerSlide 20s linear infinite;
+            animation: tickerSlideWithPause 17s linear infinite;
             font-size: 14px;
             font-weight: 600;
             color: #e0f2fe;
@@ -90,10 +96,6 @@ def inject_custom_styling(status=None):
             text-transform: uppercase;
             margin-right: 8px;
             display: inline-block;
-        }}
-
-        .ticker-item {{
-            margin-right: 32px;
         }}
 
         /* Text Area */
@@ -202,15 +204,15 @@ def inject_custom_styling(status=None):
 def analyze_heuristics(text):
     flags = []
     
-    # 1. IP address in link
+    # 1. Numeric IP in URL
     if re.search(r'https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', text):
         flags.append("Suspicious numeric IP address link detected.")
         
-    # 2. URL shorteners
+    # 2. Obfuscated link shorteners
     if re.search(r'bit\.ly|tinyurl\.com|t\.co|is\.gd|cutt\.ly|ow\.ly', text, re.IGNORECASE):
-        flags.append("Shortened link detected (used to hide real destinations).")
+        flags.append("Shortened link detected (used to hide true destinations).")
         
-    # 3. Urgency pressure triggers
+    # 3. Urgency triggers
     urgency_patterns = [
         r'\bverify your account\b', r'\baccount (has been )?suspended\b',
         r'\bimmediate action required\b', r'\bwithin 24 hours\b',
@@ -255,26 +257,23 @@ col_left, col_center, col_right = st.columns([1, 6, 1])
 
 with col_center:
     st.markdown("""
-        <div style='text-align: center; padding: 15px 0 5px 0;'>
+       <div style='text-align: center; padding: 15px 0 5px 0;'>
             <h1 style='font-size: 46px; font-weight: 800; background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
                 MailGuardX
             </h1>
-            <p style='color: #94a3b8; font-size: 16px; max-width: 580px; margin: 0 auto;'>
-                Dual-layer AI security engine: Machine Learning classification + forensic security checks.
+            <p style='color: #94a3b8; font-size: 15px; max-width: 620px; margin: 0 auto; letter-spacing: 0.2px;'>
+                Protect your inbox with intelligent threat detection and instant email safety analysis.
             </p>
         </div>
 
-        <!-- Seamless Alert Ticker with Simple Hints -->
+        <!-- Floating Alert Ticker with 2-Second Pause Interval -->
         <div class='ticker-wrap'>
             <div class='ticker-content'>
-                <span class='ticker-item'><span class='ticker-badge'>ALERT</span> Never share OTP, CVV, or passwords with anyone!</span>
-                <span class='ticker-item'>🔍 Real banks never ask for your password via email.</span>
-                <span class='ticker-item'>⚠️ Be cautious of emails threatening to block your account.</span>
-                <span class='ticker-item'>🔗 Always verify link addresses before clicking.</span>
-                <span class='ticker-item'><span class='ticker-badge'>ALERT</span> Never share OTP, CVV, or passwords with anyone!</span>
-                <span class='ticker-item'>🔍 Real banks never ask for your password via email.</span>
-                <span class='ticker-item'>⚠️ Be cautious of emails threatening to block your account.</span>
-                <span class='ticker-item'>🔗 Always verify link addresses before clicking.</span>
+                <span class='ticker-badge'>ALERT</span>
+                Never share OTP, CVV, or passwords with anyone! &nbsp;&bull;&nbsp;
+                🔍 Real banks never ask for passwords in an email. &nbsp;&bull;&nbsp;
+                ⚠️ Be careful if an email threatens to block your account. &nbsp;&bull;&nbsp;
+                🔗 Always verify link addresses before clicking.
             </div>
         </div>
     """, unsafe_allow_html=True)
